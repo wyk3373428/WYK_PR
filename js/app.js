@@ -4,7 +4,25 @@
   let currentData = [];
   let myChart = null;
 
+  // ค่าเริ่มต้นของกล่องแจ้งเตือนให้เข้ากับธีม
+  window.Swal = Swal.mixin({
+    confirmButtonColor: '#c8326f',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'ตกลง'
+  });
+
+  const SAVE_ICON = '<i class="bi bi-check2"></i>';
+
+  function setActiveNav(sectionId) {
+    const navKey = sectionId === 'admin-dashboard' || sectionId === 'admin-login' ? '' : sectionId;
+    document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('active', a.dataset.nav === navKey));
+    const nav = document.getElementById('navbarNav');
+    if (nav && nav.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(nav).hide();
+  }
+
   function showSection(sectionId) {
+    setActiveNav(sectionId);
+    window.scrollTo({ top: 0 });
     document.querySelectorAll('.app-section').forEach(el => el.style.display = 'none');
     
     if (document.getElementById(sectionId)) {
@@ -43,9 +61,10 @@
       .withSuccessHandler(renderDashboard)
       .withFailureHandler(error => {
         document.getElementById('dash-loading').innerHTML = `
-          <div class="text-danger fw-bold mb-2">❌ เกิดข้อผิดพลาดในการดึงข้อมูล</div>
-          <div class="small text-muted mb-3">${error.message}</div>
-          <button class="btn btn-outline-danger btn-sm rounded-pill" onclick="loadDashboardData()">ลองใหม่อีกครั้ง</button>
+          <i class="bi bi-exclamation-triangle fs-2 text-danger d-block mb-2"></i>
+          <div class="fw-semibold mb-1">ดึงข้อมูลไม่สำเร็จ</div>
+          <div class="small text-muted mb-3">${escapeHtml(error.message)}</div>
+          <button class="btn btn-outline-secondary btn-sm" onclick="loadDashboardData()"><i class="bi bi-arrow-clockwise"></i>ลองใหม่</button>
         `;
       })
       .getDashboardStats(year);
@@ -67,29 +86,61 @@
     document.getElementById('stat-total').innerText = data.total;
     document.getElementById('stat-success').innerText = data.status['ดำเนินการเรียบร้อย'] || 0;
     document.getElementById('stat-pending').innerText = data.status['รอดำเนินการ'] || 0;
+    document.getElementById('stat-failed').innerText = data.status['ไม่สามารถดำเนินการได้'] || 0;
     document.getElementById('stat-analysis').innerHTML = data.analysisText;
 
+    // กราฟแท่งแนวนอน เรียงจากมากไปน้อย
+    const entries = Object.entries(data.categories).sort((a, b) => b[1] - a[1]);
     const ctx = document.getElementById('categoryChart').getContext('2d');
     if (myChart != null) { myChart.destroy(); }
     myChart = new Chart(ctx, {
-      type: 'doughnut',
+      type: 'bar',
       data: {
-        labels: Object.keys(data.categories),
+        labels: entries.map(e => e[0].replace('กลุ่มบริหารงาน', '')),
         datasets: [{
-          data: Object.values(data.categories),
-          backgroundColor: ['#ff6fa3', '#667eea', '#38a169', '#f6ad55', '#4fd1c5', '#a0aec0'],
-          borderWidth: 2,
-          borderColor: '#ffffff',
-          hoverOffset: 6
+          label: 'จำนวนวารสาร',
+          data: entries.map(e => e[1]),
+          backgroundColor: '#c8326f',
+          hoverBackgroundColor: '#a9275c',
+          borderRadius: 4,
+          barThickness: 22
         }]
       },
       options: {
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'right', labels: { font: { family: 'Prompt' } } } },
-        cutout: '65%'
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0f172a',
+            titleFont: { family: 'IBM Plex Sans Thai' },
+            bodyFont: { family: 'IBM Plex Sans Thai' },
+            callbacks: { label: c => ` ${c.parsed.x} รายการ` }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { precision: 0, color: '#64748b', font: { family: 'IBM Plex Sans Thai' } },
+            grid: { color: '#f1f5f9' },
+            border: { display: false }
+          },
+          y: {
+            ticks: { color: '#334155', font: { family: 'IBM Plex Sans Thai', size: 13 } },
+            grid: { display: false },
+            border: { color: '#e5e7eb' }
+          }
+        }
       }
     });
+  }
+
+  function statusBadge(status) {
+    let cls = 'status-รอ', icon = 'bi-hourglass-split';
+    if (status === 'ดำเนินการเรียบร้อย') { cls = 'status-สำเร็จ'; icon = 'bi-check-circle'; }
+    else if (status === 'ไม่สามารถดำเนินการได้') { cls = 'status-ไม่สามารถ'; icon = 'bi-x-circle'; }
+    return `<span class="status-badge ${cls}"><i class="bi ${icon}"></i>${escapeHtml(status)}</span>`;
   }
 
   function escapeHtml(unsafe) {
@@ -100,7 +151,7 @@
   function loadData(page = 1) {
     currentPage = page;
     const tbody = document.getElementById('data-table-body');
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-brand" role="status"></div><br>กำลังโหลดข้อมูล...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="spinner-border text-brand mb-2" role="status"></div><div>กำลังโหลดข้อมูล...</div></td></tr>';
     
     const params = {
       page: currentPage,
@@ -119,31 +170,28 @@
     tbody.innerHTML = '';
 
     if (currentData.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">📭 ไม่พบข้อมูลวารสาร</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="bi bi-inbox"></i>ไม่พบข้อมูลวารสาร</td></tr>';
     } else {
       currentData.forEach((row, index) => {
-        let statusClass = "status-รอ";
-        let statusIcon = "⏳";
-        if (row['สถานะ'] === "ดำเนินการเรียบร้อย") { statusClass = "status-สำเร็จ"; statusIcon = "✅"; }
-        else if (row['สถานะ'] === "ไม่สามารถดำเนินการได้") { statusClass = "status-ไม่สามารถ"; statusIcon = "❌"; }
-
         const cat = row['หมวดหมู่'] === 'อื่นๆ' ? `อื่นๆ (${escapeHtml(row['หมวดหมู่_อื่นๆ'])})` : escapeHtml(row['หมวดหมู่']);
 
         let tr = `
           <tr>
-            <td data-label="📌 ทะเบียน :" class="fw-bold text-brand">${escapeHtml(row['เลขทะเบียน'])}</td>
-            <td data-label="📄 หัวข้อเรื่อง :">
+            <td data-label="เลขทะเบียน" class="cell-reg">${escapeHtml(row['เลขทะเบียน'])}</td>
+            <td data-label="หัวข้อเรื่อง">
               <div>
-                <div class="text-truncate fw-medium" style="max-width: 250px;" title="${escapeHtml(row['หัวข้อ'])}">${escapeHtml(row['หัวข้อ'])}</div>
-                <div class="small text-muted mt-1">👤 ${escapeHtml(row['ชื่อผู้กรอก'])}</div>
+                <div class="cell-topic text-truncate" title="${escapeHtml(row['หัวข้อ'])}">${escapeHtml(row['หัวข้อ'])}</div>
+                <div class="cell-sub"><i class="bi bi-person me-1"></i>${escapeHtml(row['ชื่อผู้กรอก'])}</div>
               </div>
             </td>
-            <td data-label="📁 หมวดหมู่ :"><span class="text-muted small">${cat}</span></td>
-            <td data-label="🚦 สถานะ :"><span class="status-badge ${statusClass}">${statusIcon} ${escapeHtml(row['สถานะ'])}</span></td>
-            <td data-label="📅 วันที่บันทึก :" class="small text-muted">${escapeHtml(row['วันที่บันทึก'].split(' ')[0])}</td>
-            <td data-label="⚙️ จัดการ :">
-              <button class="btn btn-sm btn-light border rounded-circle shadow-sm" style="width: 38px; height: 38px;" title="ดูรายละเอียด" onclick="viewRecord(${index})">🔍</button>
-              ${isAdminMode ? `<button class="btn btn-sm btn-light border rounded-circle shadow-sm ms-2" style="width: 38px; height: 38px;" title="แก้ไข" onclick="openEditModal(${index})">✏️</button>` : ''}
+            <td data-label="กลุ่มงาน"><span class="small">${cat}</span></td>
+            <td data-label="สถานะ">${statusBadge(row['สถานะ'])}</td>
+            <td data-label="วันที่บันทึก" class="cell-date">${escapeHtml((row['วันที่บันทึก'] || '').split(' ')[0])}</td>
+            <td data-label="จัดการ" class="text-end">
+              <div class="d-inline-flex gap-1">
+                <button class="btn btn-icon" title="ดูรายละเอียด" aria-label="ดูรายละเอียด" onclick="viewRecord(${index})"><i class="bi bi-eye"></i></button>
+                ${isAdminMode ? `<button class="btn btn-icon" title="แก้ไข" aria-label="แก้ไข" onclick="openEditModal(${index})"><i class="bi bi-pencil"></i></button>` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -159,8 +207,8 @@
     pCtrl.innerHTML = '';
     if (totalPages <= 1) return;
 
-    let btnPrev = `<button class="btn btn-outline-secondary btn-sm rounded-pill px-3" ${currentPage === 1 ? 'disabled' : ''} onclick="loadData(${currentPage - 1})">« ก่อนหน้า</button>`;
-    let btnNext = `<button class="btn btn-outline-secondary btn-sm rounded-pill px-3 ms-1" ${currentPage === totalPages ? 'disabled' : ''} onclick="loadData(${currentPage + 1})">ถัดไป »</button>`;
+    let btnPrev = `<button class="btn btn-outline-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="loadData(${currentPage - 1})"><i class="bi bi-chevron-left"></i>ก่อนหน้า</button>`;
+    let btnNext = `<button class="btn btn-outline-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="loadData(${currentPage + 1})">ถัดไป<i class="bi bi-chevron-right ms-2"></i></button>`;
     pCtrl.innerHTML = btnPrev + btnNext;
   }
 
@@ -201,11 +249,11 @@
 
     google.script.run.withFailureHandler(err => {
       btn.disabled = false;
-      btn.innerHTML = "💾 บันทึกข้อมูล";
+      btn.innerHTML = SAVE_ICON + "บันทึกข้อมูล";
       Swal.fire('ข้อผิดพลาด', err.message, 'error');
     }).withSuccessHandler(res => {
       btn.disabled = false;
-      btn.innerHTML = "💾 บันทึกข้อมูล";
+      btn.innerHTML = SAVE_ICON + "บันทึกข้อมูล";
       if (res.success) {
         Swal.fire('สำเร็จ', `บันทึกข้อมูลเรียบร้อย<br>เลขทะเบียน: <b>${res.regNo}</b>`, 'success').then(() => {
           showSection('public-dashboard');
@@ -218,19 +266,18 @@
 
   function viewRecord(index) {
     const row = currentData[index];
+    const item = (label, value) => `<div class="row"><dt class="col-sm-3">${label}</dt><dd class="col-sm-9">${value}</dd></div>`;
     let html = `
-      <table class="table table-bordered mb-0">
-        <tbody>
-          <tr><th width="30%" class="bg-light">เลขทะเบียน</th><td class="text-brand fw-bold">${escapeHtml(row['เลขทะเบียน'])}</td></tr>
-          <tr><th class="bg-light">สถานะ</th><td><b>${escapeHtml(row['สถานะ'])}</b></td></tr>
-          <tr><th class="bg-light">หัวข้อ</th><td class="fw-medium">${escapeHtml(row['หัวข้อ'])}</td></tr>
-          <tr><th class="bg-light">เนื้อหา</th><td style="white-space: pre-wrap;">${escapeHtml(row['เนื้อหา'])}</td></tr>
-          <tr><th class="bg-light">ผู้กรอกข้อมูล</th><td>${escapeHtml(row['ชื่อผู้กรอก'])}</td></tr>
-          <tr><th class="bg-light">หมวดหมู่</th><td>${escapeHtml(row['หมวดหมู่'])} ${row['หมวดหมู่_อื่นๆ'] ? `(${escapeHtml(row['หมวดหมู่_อื่นๆ'])})` : ''}</td></tr>
-          <tr><th class="bg-light">วันที่บันทึก</th><td>${escapeHtml(row['วันที่บันทึก'])}</td></tr>
-          ${row['หมายเหตุ'] ? `<tr><th class="bg-light text-danger">หมายเหตุ</th><td class="text-danger fw-bold">${escapeHtml(row['หมายเหตุ'])}</td></tr>` : ''}
-        </tbody>
-      </table>
+      <dl class="detail-list">
+        ${item('เลขทะเบียน', `<span class="cell-reg">${escapeHtml(row['เลขทะเบียน'])}</span>`)}
+        ${item('สถานะ', statusBadge(row['สถานะ']))}
+        ${item('หัวข้อ', `<span class="fw-semibold">${escapeHtml(row['หัวข้อ'])}</span>`)}
+        ${item('เนื้อหา', `<div style="white-space: pre-wrap;">${escapeHtml(row['เนื้อหา'])}</div>`)}
+        ${item('ผู้กรอกข้อมูล', escapeHtml(row['ชื่อผู้กรอก']))}
+        ${item('กลุ่มงาน', `${escapeHtml(row['หมวดหมู่'])} ${row['หมวดหมู่_อื่นๆ'] ? `(${escapeHtml(row['หมวดหมู่_อื่นๆ'])})` : ''}`)}
+        ${item('วันที่บันทึก', escapeHtml(row['วันที่บันทึก']))}
+      </dl>
+      ${row['หมายเหตุ'] ? `<div class="detail-note"><i class="bi bi-info-circle me-2"></i><b>หมายเหตุ:</b> ${escapeHtml(row['หมายเหตุ'])}</div>` : ''}
     `;
     document.getElementById('view-title').innerText = "รายละเอียดวารสาร";
     document.getElementById('view-body').innerHTML = html;
@@ -334,13 +381,13 @@
     if (tab === 'data') {
       document.getElementById('public-dashboard').style.display = 'block';
       document.getElementById('admin-settings-container').style.display = 'none';
-      document.getElementById('btn-tab-data').className = "btn btn-light rounded-pill px-3 shadow-sm fw-bold";
-      document.getElementById('btn-tab-settings').className = "btn btn-outline-light rounded-pill px-3 fw-bold";
+      document.getElementById('btn-tab-data').className = "btn btn-admin-tab active";
+      document.getElementById('btn-tab-settings').className = "btn btn-admin-tab";
     } else if (tab === 'settings') {
       document.getElementById('public-dashboard').style.display = 'none';
       document.getElementById('admin-settings-container').style.display = 'block';
-      document.getElementById('btn-tab-data').className = "btn btn-outline-light rounded-pill px-3 fw-bold";
-      document.getElementById('btn-tab-settings').className = "btn btn-light rounded-pill px-3 shadow-sm fw-bold";
+      document.getElementById('btn-tab-data').className = "btn btn-admin-tab";
+      document.getElementById('btn-tab-settings').className = "btn btn-admin-tab active";
       loadAdminSettings();
     }
   }
@@ -381,7 +428,7 @@
       });
 
       btn.disabled = false;
-      btn.innerText = "💾 บันทึกการตั้งค่า";
+      btn.innerHTML = SAVE_ICON + "บันทึกการตั้งค่า";
     }).getAdminSettings();
   }
 
@@ -411,7 +458,7 @@
     
     google.script.run.withSuccessHandler(res => {
       btn.disabled = false;
-      btn.innerText = "💾 บันทึกการตั้งค่า";
+      btn.innerHTML = SAVE_ICON + "บันทึกการตั้งค่า";
       if (res.success) {
         Swal.fire('สำเร็จ', res.message, 'success');
       } else {
@@ -421,5 +468,7 @@
   }
 
   window.onload = () => {
+    const fy = document.getElementById("footer-year");
+    if (fy) fy.textContent = new Date().getFullYear() + 543;
     showSection('home-dashboard');
   };

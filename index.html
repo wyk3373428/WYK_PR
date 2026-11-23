@@ -3,229 +3,317 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบวารสาร | โรงเรียนวัดบางพลีใหญ่กลาง</title>
-  
+  <title>ระบบทะเบียนวารสาร | โรงเรียนวัดบางพลีใหญ่กลาง</title>
+  <meta name="description" content="ระบบทะเบียนและติดตามสถานะวารสาร โรงเรียนวัดบางพลีใหญ่กลาง">
+  <link rel="icon" type="image/png" href="https://i.postimg.cc/NK5NnGXZ/Logo-WYK-removebg-preview.png">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+
   <link href="css/style.css" rel="stylesheet">
 </head>
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
+  <nav class="navbar navbar-expand-lg sticky-top app-nav">
     <div class="container">
-      <a class="navbar-brand d-flex flex-column" href="#" onclick="showSection('home-dashboard')">
-        <div class="d-flex align-items-center gap-2">
-          <!-- เปลี่ยนไอคอนเป็นรูปภาพโลโก้ -->
-          <!-- โลโก้โรงเรียนวัดบางพลีใหญ่กลาง -->
-          <img src="https://i.postimg.cc/NK5NnGXZ/Logo-WYK-removebg-preview.png" style="height: 45px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
-          <span style="color: var(--brand-primary); font-size: 1.4rem; font-weight: 700;">ระบบทะเบียนวารสาร</span>
-        </div>
-        <span class="text-muted" style="font-size: 0.75rem; font-weight: 500; margin-left: 2.8rem; margin-top: -0.3rem;">
-          โรงเรียนวัดบางพลีใหญ่กลาง
+      <a class="navbar-brand brand" href="#" onclick="showSection('home-dashboard'); return false;">
+        <img src="https://i.postimg.cc/NK5NnGXZ/Logo-WYK-removebg-preview.png" alt="ตราโรงเรียน" class="brand-logo">
+        <span class="brand-text">
+          <span class="brand-title">ระบบทะเบียนวารสาร</span>
+          <span class="brand-sub">โรงเรียนวัดบางพลีใหญ่กลาง</span>
         </span>
       </a>
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="เมนู">
+        <i class="bi bi-list fs-2"></i>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center gap-1">
-          <li class="nav-item"><a class="nav-link fw-bold text-dark px-3 rounded-pill" href="#" onclick="showSection('home-dashboard')">📊 ภาพรวม</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold text-dark px-3 rounded-pill" href="#" onclick="showSection('public-dashboard')">📄 รายการวารสาร</a></li>
-          <li class="nav-item"><a class="nav-link fw-bold text-brand px-3 rounded-pill" style="background: rgba(255,111,163,0.1);" href="#" onclick="showSection('form-section')">✍️ บันทึกข้อมูล</a></li>
-          <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
-            <button class="btn btn-dark btn-sm rounded-pill px-4 py-2 fw-semibold shadow-sm" onclick="checkAdminAccess()">🔒 ผู้ดูแลระบบ</button>
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="#" data-nav="home-dashboard" onclick="showSection('home-dashboard'); return false;"><i class="bi bi-grid-1x2"></i>ภาพรวม</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-nav="public-dashboard" onclick="showSection('public-dashboard'); return false;"><i class="bi bi-journal-text"></i>รายการวารสาร</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" data-nav="form-section" onclick="showSection('form-section'); return false;"><i class="bi bi-plus-square"></i>บันทึกข้อมูล</a></li>
+          <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+            <button class="btn btn-ghost btn-sm" onclick="checkAdminAccess()"><i class="bi bi-shield-lock"></i>ผู้ดูแลระบบ</button>
           </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container my-5">
+  <main class="container py-4 py-lg-5">
 
     <!-- 0. Home Dashboard -->
-    <div id="home-dashboard" class="app-section">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+    <section id="home-dashboard" class="app-section">
+      <div class="page-head">
         <div>
-          <h1 class="fw-bold text-dark mb-1" style="font-size: 2.5rem; letter-spacing: -1px;">สถิติการดำเนินงาน</h1>
-          <p class="text-muted fs-5 mb-0">ข้อมูลภาพรวมระบบวารสารของโรงเรียน</p>
+          <h1 class="page-title">สถิติการดำเนินงาน</h1>
+          <p class="page-sub">ภาพรวมการรับและดำเนินการวารสารของโรงเรียน</p>
         </div>
-        <div class="d-flex align-items-center gap-3 bg-white p-2 px-3 rounded-pill shadow-sm border">
-          <label class="text-dark fw-bold mb-0 text-nowrap">ปีการศึกษา :</label>
-          <select id="dash-year-filter" class="form-select form-select-sm border-0 fw-bold text-brand bg-transparent" style="width: 100px; box-shadow: none;" onchange="loadDashboardData()">
+        <div class="year-filter">
+          <label for="dash-year-filter"><i class="bi bi-calendar3"></i>ปี พ.ศ.</label>
+          <select id="dash-year-filter" class="form-select form-select-sm" onchange="loadDashboardData()">
             <option value="">ทั้งหมด</option>
           </select>
         </div>
       </div>
 
-      <div id="dash-loading" class="text-center py-5">
-        <div class="spinner-border text-brand" style="width: 3rem; height: 3rem;"></div>
-        <div class="mt-3 text-muted fw-medium fs-5">ระบบกำลังประมวลผลข้อมูล...</div>
+      <div id="dash-loading" class="state-box">
+        <div class="spinner-border text-brand" role="status"></div>
+        <div class="mt-3 text-muted">กำลังโหลดข้อมูล...</div>
       </div>
 
       <div id="dash-content" style="display: none;">
-        <div class="row g-4 mb-5">
-          <div class="col-md-4">
-            <div class="card h-100 p-4 p-lg-5 text-center border-0 shadow-sm">
-              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 60px; height: 60px; background: linear-gradient(135deg, #f1f5f9, #e2e8f0);">
-                <span style="font-size: 1.8rem;">📁</span>
-              </div>
-              <h6 class="text-muted fw-bold mb-2 text-uppercase">วารสารทั้งหมด</h6>
-              <h2 class="fw-bold text-dark mb-0" style="font-size: 3rem;" id="stat-total">0</h2>
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="bi bi-journals"></i></div>
+              <div class="stat-label">วารสารทั้งหมด</div>
+              <div class="stat-value" id="stat-total">0</div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="card h-100 p-4 p-lg-5 text-center border-0 shadow-sm">
-              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 60px; height: 60px; background: linear-gradient(135deg, #dcfce7, #bbf7d0);">
-                <span style="font-size: 1.8rem;">✅</span>
-              </div>
-              <h6 class="text-muted fw-bold mb-2 text-uppercase">ดำเนินการเรียบร้อย</h6>
-              <h2 class="fw-bold text-success mb-0" style="font-size: 3rem;" id="stat-success">0</h2>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon is-success"><i class="bi bi-check2-circle"></i></div>
+              <div class="stat-label">ดำเนินการเรียบร้อย</div>
+              <div class="stat-value" id="stat-success">0</div>
             </div>
           </div>
-          <div class="col-md-4">
-            <div class="card h-100 p-4 p-lg-5 text-center border-0 shadow-sm">
-              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" style="width: 60px; height: 60px; background: linear-gradient(135deg, #fef9c3, #fef08a);">
-                <span style="font-size: 1.8rem;">⏳</span>
-              </div>
-              <h6 class="text-muted fw-bold mb-2 text-uppercase">รอดำเนินการ</h6>
-              <h2 class="fw-bold text-warning mb-0" style="font-size: 3rem;" id="stat-pending">0</h2>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon is-warning"><i class="bi bi-hourglass-split"></i></div>
+              <div class="stat-label">รอดำเนินการ</div>
+              <div class="stat-value" id="stat-pending">0</div>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="stat-card">
+              <div class="stat-icon is-danger"><i class="bi bi-x-circle"></i></div>
+              <div class="stat-label">ดำเนินการไม่ได้</div>
+              <div class="stat-value" id="stat-failed">0</div>
             </div>
           </div>
         </div>
 
-        <div class="row g-4">
-          <div class="col-lg-7">
-            <div class="card p-4 p-lg-5 h-100 border-0 shadow-sm">
-              <h4 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
-                <span style="font-size: 1.5rem;">📊</span> สัดส่วนกลุ่มงาน
-              </h4>
-              <div style="position: relative; height: 320px; width: 100%;">
-                <canvas id="categoryChart"></canvas>
+        <div class="row g-3">
+          <div class="col-lg-8">
+            <div class="panel h-100">
+              <div class="panel-head">
+                <h2 class="panel-title">จำนวนวารสารแยกตามกลุ่มงาน</h2>
+              </div>
+              <div class="chart-wrap">
+                <canvas id="categoryChart" aria-label="กราฟจำนวนวารสารแยกตามกลุ่มงาน" role="img"></canvas>
               </div>
             </div>
           </div>
-          <div class="col-lg-5">
-            <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,229,240,0.8) 100%);">
-              <div class="card-body p-4 p-lg-5 d-flex flex-column justify-content-center">
-                <div class="mb-4"><span style="font-size: 3rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">✨</span></div>
-                <h3 class="fw-bold text-brand mb-4">วิเคราะห์ภาพรวม</h3>
-                <p id="stat-analysis" class="text-dark" style="line-height: 1.9; font-size: 1.15rem; font-weight: 400;"></p>
-                <button class="btn btn-dark rounded-pill mt-5 align-self-start py-2 px-4 shadow-sm fw-bold" onclick="showSection('public-dashboard')">ดูรายการทั้งหมด</button>
+          <div class="col-lg-4">
+            <div class="panel h-100 d-flex flex-column">
+              <div class="panel-head">
+                <h2 class="panel-title">สรุปภาพรวม</h2>
               </div>
+              <p id="stat-analysis" class="summary-text"></p>
+              <button class="btn btn-brand mt-auto align-self-start" onclick="showSection('public-dashboard')">
+                ดูรายการทั้งหมด<i class="bi bi-arrow-right ms-2 me-0"></i>
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- 1. Public Dashboard Section -->
-    <div id="public-dashboard" class="app-section" style="display: none;">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
-        <div>
-          <h1 class="fw-bold text-dark mb-1" style="font-size: 2.5rem; letter-spacing: -1px;">รายการวารสาร</h1>
-          <p class="text-muted fs-5 mb-0">ค้นหาและติดตามสถานะเอกสารในระบบ</p>
+    </section>
+
+    <!-- 4. Admin Dashboard Section (แสดงเหนือตารางเมื่ออยู่ในโหมดผู้ดูแล) -->
+    <section id="admin-dashboard" class="app-section" style="display: none;">
+      <div class="admin-bar">
+        <div class="admin-bar-title"><i class="bi bi-shield-check"></i>โหมดผู้ดูแลระบบ</div>
+        <div class="admin-bar-actions">
+          <button class="btn btn-admin-tab active" id="btn-tab-data" onclick="toggleAdminTab('data')"><i class="bi bi-table"></i>ข้อมูลวารสาร</button>
+          <button class="btn btn-admin-tab" id="btn-tab-settings" onclick="toggleAdminTab('settings')"><i class="bi bi-bell"></i>ตั้งค่าการแจ้งเตือน</button>
+          <button class="btn btn-admin-logout" onclick="logoutAdmin()"><i class="bi bi-box-arrow-right"></i>ออกจากระบบ</button>
         </div>
-        <button class="btn btn-brand rounded-pill fs-5 shadow" onclick="showSection('form-section')">
-          <span class="fs-4 me-2">+</span>เพิ่มวารสารใหม่
+      </div>
+
+      <div id="admin-table-container"></div>
+
+      <!-- Admin Settings -->
+      <div id="admin-settings-container" style="display: none;">
+        <div class="panel max-w-640 mx-auto">
+          <div class="panel-head border-bottom pb-3 mb-4">
+            <div>
+              <h2 class="panel-title"><i class="bi bi-bell me-2 text-brand"></i>การแจ้งเตือนงานค้างทาง LINE</h2>
+              <p class="text-muted small mb-0">กำหนดวันและเวลาที่ระบบจะสรุปงานที่รอดำเนินการส่งเข้ากลุ่ม LINE</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleSaveSettings(event)">
+            <div class="setting-row mb-4">
+              <label class="form-check-label fw-semibold" for="set-notify-enable">เปิดใช้งานการแจ้งเตือน</label>
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" role="switch" id="set-notify-enable" onchange="toggleFormDisable()">
+              </div>
+            </div>
+
+            <div id="setting-details-group">
+              <div class="mb-4">
+                <label class="form-label">วันที่แจ้งเตือน</label>
+                <div class="option-box">
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="notifyDayType" id="day-daily" value="daily" onchange="toggleDaySelection()">
+                    <label class="form-check-label" for="day-daily">ทุกวัน (จันทร์ – อาทิตย์)</label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="notifyDayType" id="day-specific" value="specific" onchange="toggleDaySelection()">
+                    <label class="form-check-label" for="day-specific">เฉพาะวันที่เลือก</label>
+                  </div>
+
+                  <div id="specific-days-container" class="mt-3 pt-3 border-top" style="display: none;">
+                    <div class="day-chips">
+                      <input class="btn-check day-checkbox" type="checkbox" value="MONDAY" id="day-mon"><label class="btn day-chip" for="day-mon">จ.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="TUESDAY" id="day-tue"><label class="btn day-chip" for="day-tue">อ.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="WEDNESDAY" id="day-wed"><label class="btn day-chip" for="day-wed">พ.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="THURSDAY" id="day-thu"><label class="btn day-chip" for="day-thu">พฤ.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="FRIDAY" id="day-fri"><label class="btn day-chip" for="day-fri">ศ.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="SATURDAY" id="day-sat"><label class="btn day-chip" for="day-sat">ส.</label>
+                      <input class="btn-check day-checkbox" type="checkbox" value="SUNDAY" id="day-sun"><label class="btn day-chip" for="day-sun">อา.</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label" for="set-notify-hour">ช่วงเวลาที่แจ้งเตือน</label>
+                <select class="form-select" id="set-notify-hour">
+                  <option value="6">06:00 – 07:00 น.</option>
+                  <option value="7">07:00 – 08:00 น.</option>
+                  <option value="8">08:00 – 09:00 น.</option>
+                  <option value="9">09:00 – 10:00 น.</option>
+                  <option value="12">12:00 – 13:00 น.</option>
+                  <option value="16">16:00 – 17:00 น.</option>
+                  <option value="20">20:00 – 21:00 น.</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="text-end">
+              <button type="submit" class="btn btn-brand" id="btn-save-settings"><i class="bi bi-check2"></i>บันทึกการตั้งค่า</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. Public Dashboard Section -->
+    <section id="public-dashboard" class="app-section" style="display: none;">
+      <div class="page-head" id="dashboard-header">
+        <div>
+          <h1 class="page-title">รายการวารสาร</h1>
+          <p class="page-sub">ค้นหาและติดตามสถานะวารสารในระบบ</p>
+        </div>
+        <button class="btn btn-brand" onclick="showSection('form-section')">
+          <i class="bi bi-plus-lg"></i>เพิ่มวารสารใหม่
         </button>
       </div>
 
-      <div class="card mb-5 border-0 shadow-sm">
-        <div class="card-body p-4 p-lg-5">
-          <div class="row g-4">
-            <div class="col-md-4">
-              <label class="form-label text-dark fw-bold">ค้นหา</label>
-              <input type="text" id="filter-search" class="form-control" placeholder="🔍 พิมพ์คำค้นหา..." onkeyup="if(event.key === 'Enter') loadData()">
+      <div class="panel filter-panel mb-3">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label" for="filter-search">ค้นหา</label>
+            <div class="input-icon">
+              <i class="bi bi-search"></i>
+              <input type="text" id="filter-search" class="form-control" placeholder="เลขทะเบียน หัวข้อ หรือชื่อผู้กรอก" onkeyup="if(event.key === 'Enter') loadData()">
             </div>
-            <div class="col-md-3">
-              <label class="form-label text-dark fw-bold">สถานะ</label>
-              <select id="filter-status" class="form-select" onchange="loadData()">
-                <option value="">-- ทั้งหมด --</option>
-                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                <option value="ดำเนินการเรียบร้อย">ดำเนินการเรียบร้อย</option>
-                <option value="ไม่สามารถดำเนินการได้">ไม่สามารถดำเนินการได้</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label text-dark fw-bold">หมวดหมู่</label>
-              <select id="filter-category" class="form-select" onchange="loadData()">
-                <option value="">-- ทั้งหมด --</option>
-                <option value="กลุ่มบริหารงานวิชาการ">บริหารงานวิชาการ</option>
-                <option value="กลุ่มบริหารงานงบประมาณ">บริหารงานงบประมาณ</option>
-                <option value="กลุ่มบริหารงานทั่วไป">บริหารงานทั่วไป</option>
-                <option value="กลุ่มบริหารงานบุคคล">บริหารงานบุคคล</option>
-                <option value="อื่นๆ">อื่นๆ</option>
-              </select>
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button class="btn btn-dark w-100 fw-bold py-3 rounded-3 shadow-sm" onclick="loadData()">ค้นหาข้อมูล</button>
-            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="form-label" for="filter-status">สถานะ</label>
+            <select id="filter-status" class="form-select" onchange="loadData()">
+              <option value="">ทั้งหมด</option>
+              <option value="รอดำเนินการ">รอดำเนินการ</option>
+              <option value="ดำเนินการเรียบร้อย">ดำเนินการเรียบร้อย</option>
+              <option value="ไม่สามารถดำเนินการได้">ไม่สามารถดำเนินการได้</option>
+            </select>
+          </div>
+          <div class="col-6 col-md-2">
+            <label class="form-label" for="filter-category">กลุ่มงาน</label>
+            <select id="filter-category" class="form-select" onchange="loadData()">
+              <option value="">ทั้งหมด</option>
+              <option value="กลุ่มบริหารงานวิชาการ">วิชาการ</option>
+              <option value="กลุ่มบริหารงานงบประมาณ">งบประมาณ</option>
+              <option value="กลุ่มบริหารงานทั่วไป">ทั่วไป</option>
+              <option value="กลุ่มบริหารงานบุคคล">บุคคล</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-dark-soft w-100" onclick="loadData()"><i class="bi bi-search"></i>ค้นหา</button>
           </div>
         </div>
       </div>
 
-      <div class="table-responsive shadow-sm border-0">
-        <table class="table align-middle mb-0">
-          <thead>
-            <tr>
-              <th width="15%" class="px-4">ทะเบียน</th>
-              <th width="30%">หัวข้อเรื่อง</th>
-              <th width="15%">หมวดหมู่</th>
-              <th width="15%">สถานะ</th>
-              <th width="15%">วันที่บันทึก</th>
-              <th width="10%" class="text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="data-table-body">
-            <tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-brand"></div><br>กำลังโหลดข้อมูล...</td></tr>
-          </tbody>
-        </table>
+      <div class="panel p-0 overflow-hidden table-panel">
+        <div class="table-responsive">
+          <table class="table data-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:15%">เลขทะเบียน</th>
+                <th style="width:34%">หัวข้อเรื่อง</th>
+                <th style="width:17%">กลุ่มงาน</th>
+                <th style="width:16%">สถานะ</th>
+                <th style="width:10%">วันที่บันทึก</th>
+                <th style="width:8%" class="text-end">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body">
+              <tr><td colspan="6" class="text-center py-5"><div class="spinner-border text-brand"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span id="pagination-info" class="text-muted small"></span>
+          <div id="pagination-controls" class="d-flex gap-2"></div>
+        </div>
       </div>
-      <div class="d-flex justify-content-between align-items-center mt-4 p-3 bg-white rounded-pill shadow-sm border border-light">
-        <span id="pagination-info" class="text-muted small fw-bold px-3"></span>
-        <div id="pagination-controls" class="btn-group shadow-sm rounded-pill"></div>
-      </div>
-    </div>
+    </section>
 
     <!-- 2. Form Section -->
-    <div id="form-section" class="app-section" style="display: none;">
-      <div class="card max-w-800 mx-auto border-0 shadow-sm">
-        <div class="card-body p-4 p-md-5">
-          <div class="text-center mb-5">
-            <span style="font-size: 3rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">📝</span>
-            <h2 class="fw-bold text-dark mt-3">ฟอร์มบันทึกวารสาร</h2>
-            <p class="text-muted">กรอกข้อมูลเพื่อบันทึกลงสู่ระบบของโรงเรียน</p>
+    <section id="form-section" class="app-section" style="display: none;">
+      <div class="max-w-800 mx-auto">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">บันทึกวารสาร</h1>
+            <p class="page-sub">กรอกข้อมูลวารสารเพื่อลงทะเบียนในระบบของโรงเรียน</p>
           </div>
+        </div>
+        <div class="panel">
           <form id="record-form" onsubmit="handleFormSubmit(event)">
             <div class="mb-4">
-              <label class="form-label fw-bold">เลขทะเบียนคุมวารสาร <span class="text-danger">*</span></label>
-              <div class="input-group shadow-sm rounded-3">
-                <input type="text" class="form-control" id="f-regNo" required>
-                <button class="btn btn-outline-brand fw-bold" type="button" onclick="fetchRegNumber()">🔄 ดึงเลขล่าสุด</button>
+              <label class="form-label" for="f-regNo">เลขทะเบียนคุมวารสาร <span class="req">*</span></label>
+              <div class="input-group">
+                <input type="text" class="form-control fw-semibold" id="f-regNo" required>
+                <button class="btn btn-outline-secondary" type="button" onclick="fetchRegNumber()"><i class="bi bi-arrow-clockwise"></i>ดึงเลขล่าสุด</button>
               </div>
+              <div class="form-text">ระบบออกเลขให้อัตโนมัติ ตามรูปแบบ ว.ญ.ก.ลำดับ/ปี พ.ศ.</div>
             </div>
             <div class="mb-4">
-              <label class="form-label fw-bold">หัวข้อ / ชื่อเรื่อง <span class="text-danger">*</span></label>
-              <input type="text" class="form-control shadow-sm" id="f-topic" required placeholder="ระบุหัวข้อวารสาร...">
+              <label class="form-label" for="f-topic">หัวข้อ / ชื่อเรื่อง <span class="req">*</span></label>
+              <input type="text" class="form-control" id="f-topic" required placeholder="ระบุหัวข้อวารสาร">
             </div>
             <div class="mb-4">
-              <label class="form-label fw-bold">เนื้อหา <span class="text-danger">*</span></label>
-              <textarea class="form-control shadow-sm" id="f-content" rows="5" required placeholder="รายละเอียดเนื้อหาวารสาร..."></textarea>
+              <label class="form-label" for="f-content">เนื้อหา <span class="req">*</span></label>
+              <textarea class="form-control" id="f-content" rows="6" required placeholder="รายละเอียดเนื้อหาวารสาร"></textarea>
             </div>
             <div class="row g-4 mb-4">
               <div class="col-md-6">
-                <label class="form-label fw-bold">ผู้กรอกข้อมูล <span class="text-danger">*</span></label>
-                <input type="text" class="form-control shadow-sm" id="f-author" required placeholder="ชื่อ - นามสกุล">
+                <label class="form-label" for="f-author">ผู้กรอกข้อมูล <span class="req">*</span></label>
+                <input type="text" class="form-control" id="f-author" required placeholder="ชื่อ – นามสกุล">
               </div>
               <div class="col-md-6">
-                <label class="form-label fw-bold">หมวดหมู่ <span class="text-danger">*</span></label>
-                <select class="form-select shadow-sm" id="f-category" required onchange="toggleOtherCategory('f-category', 'f-category-other-div')">
-                  <option value="" disabled selected>-- เลือกหมวดหมู่ --</option>
+                <label class="form-label" for="f-category">กลุ่มงาน <span class="req">*</span></label>
+                <select class="form-select" id="f-category" required onchange="toggleOtherCategory('f-category', 'f-category-other-div')">
+                  <option value="" disabled selected>เลือกกลุ่มงาน</option>
                   <option value="กลุ่มบริหารงานวิชาการ">กลุ่มบริหารงานวิชาการ</option>
                   <option value="กลุ่มบริหารงานงบประมาณ">กลุ่มบริหารงานงบประมาณ</option>
                   <option value="กลุ่มบริหารงานทั่วไป">กลุ่มบริหารงานทั่วไป</option>
@@ -234,159 +322,85 @@
                 </select>
               </div>
             </div>
-            <div class="mb-4 p-3 bg-light rounded-3 border shadow-sm" id="f-category-other-div" style="display:none;">
-              <label class="form-label fw-bold">โปรดระบุหมวดหมู่เพิ่มเติม <span class="text-danger">*</span></label>
-              <input type="text" class="form-control bg-white" id="f-category-other">
+            <div class="mb-4" id="f-category-other-div" style="display:none;">
+              <label class="form-label" for="f-category-other">โปรดระบุกลุ่มงาน <span class="req">*</span></label>
+              <input type="text" class="form-control" id="f-category-other">
             </div>
-            <div class="text-end mt-5">
-              <button type="button" class="btn btn-light rounded-pill px-4 me-2 border shadow-sm fw-bold" onclick="showSection('public-dashboard')">ยกเลิก</button>
-              <button type="submit" class="btn btn-brand rounded-pill px-5 shadow fs-6 fw-bold" id="btn-submit">💾 บันทึกข้อมูล</button>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline-secondary" onclick="showSection('public-dashboard')">ยกเลิก</button>
+              <button type="submit" class="btn btn-brand" id="btn-submit"><i class="bi bi-check2"></i>บันทึกข้อมูล</button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- 3. Admin Login Section -->
-    <div id="admin-login" class="app-section" style="display: none;">
-      <div class="card max-w-500 mx-auto mt-5 border-0 shadow-sm rounded-4">
-        <div class="card-body p-5 text-center">
+    <section id="admin-login" class="app-section" style="display: none;">
+      <div class="panel max-w-420 mx-auto mt-lg-4">
+        <div class="text-center mb-4">
+          <div class="login-icon"><i class="bi bi-shield-lock"></i></div>
+          <h1 class="page-title fs-3 mt-3 mb-1">เข้าสู่ระบบผู้ดูแล</h1>
+          <p class="text-muted small mb-0">สำหรับจัดการข้อมูลและตั้งค่าการแจ้งเตือน</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+          <div class="mb-3">
+            <label class="form-label" for="login-id">ชื่อผู้ใช้งาน</label>
+            <input type="text" id="login-id" class="form-control" autocomplete="username" required>
+          </div>
           <div class="mb-4">
-            <span style="font-size: 3.5rem;">🛡️</span>
-            <h3 class="fw-bold text-brand mt-3">ผู้ดูแลระบบ</h3>
-            <p class="text-muted">กรุณาเข้าสู่ระบบเพื่อจัดการข้อมูลและการตั้งค่า</p>
+            <label class="form-label" for="login-pass">รหัสผ่าน</label>
+            <input type="password" id="login-pass" class="form-control" autocomplete="current-password" required>
           </div>
-          <form onsubmit="handleLogin(event)">
-            <input type="text" id="login-id" class="form-control mb-3 text-center rounded-pill shadow-sm py-2" placeholder="ชื่อผู้ใช้งาน (Username)" required>
-            <input type="password" id="login-pass" class="form-control mb-4 text-center rounded-pill shadow-sm py-2" placeholder="รหัสผ่าน (Password)" required>
-            <button type="submit" class="btn btn-brand w-100 rounded-pill shadow py-2 fs-5 fw-bold" id="btn-login">เข้าสู่ระบบ</button>
-          </form>
-        </div>
+          <button type="submit" class="btn btn-brand w-100" id="btn-login">เข้าสู่ระบบ</button>
+        </form>
       </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+      <span>© <span id="footer-year"></span> โรงเรียนวัดบางพลีใหญ่กลาง</span>
+      <span>ระบบทะเบียนวารสาร · ข้อมูลจัดเก็บใน Google Sheets</span>
     </div>
-
-    <!-- 4. Admin Dashboard Section -->
-    <div id="admin-dashboard" class="app-section" style="display: none;">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 bg-dark text-white p-3 rounded-4 shadow">
-        <h4 class="fw-bold mb-0 ms-2">🛠️ โหมดผู้ดูแลระบบ (Admin)</h4>
-        <div class="mt-3 mt-md-0 d-flex flex-wrap gap-2">
-          <button class="btn btn-light rounded-pill px-3 shadow-sm fw-bold" id="btn-tab-data" onclick="toggleAdminTab('data')">📄 ข้อมูลวารสาร</button>
-          <button class="btn btn-outline-light rounded-pill px-3 fw-bold" id="btn-tab-settings" onclick="toggleAdminTab('settings')">⚙️ ตั้งค่าการแจ้งเตือน</button>
-          <button class="btn btn-danger rounded-pill px-3 fw-bold ms-md-2" onclick="logoutAdmin()">ออกจากระบบ</button>
-        </div>
-      </div>
-      
-      <div id="admin-table-container"></div>
-
-      <!-- Admin Settings -->
-      <div id="admin-settings-container" style="display: none;">
-        <div class="card border-0 shadow-sm rounded-4 max-w-600 mx-auto mt-4">
-          <div class="card-body p-4 p-md-5">
-            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-              <span style="font-size: 2.5rem;" class="me-3">⏰</span>
-              <div>
-                <h4 class="fw-bold text-dark mb-0">ระบบแจ้งเตือนงานค้าง</h4>
-                <p class="text-muted small mb-0">ปรับแต่งเวลาและวันที่ต้องการให้บอทแจ้งเตือนอัตโนมัติ</p>
-              </div>
-            </div>
-            
-            <form onsubmit="handleSaveSettings(event)">
-              <div class="mb-4 bg-light p-3 rounded-4 border">
-                <div class="form-check form-switch fs-5 d-flex align-items-center p-0">
-                  <label class="form-check-label fw-bold flex-grow-1 text-dark" for="set-notify-enable" style="cursor: pointer;">
-                    🔔 เปิดใช้งานการแจ้งเตือน
-                  </label>
-                  <input class="form-check-input m-0 shadow-sm" type="checkbox" id="set-notify-enable" style="cursor: pointer; width: 3em; height: 1.5em;" onchange="toggleFormDisable()">
-                </div>
-              </div>
-
-              <div id="setting-details-group">
-                <div class="mb-4">
-                  <label class="form-label fw-bold text-dark">📅 วันที่ต้องการให้แจ้งเตือน</label>
-                  <div class="bg-white p-3 rounded-3 border shadow-sm">
-                    <div class="form-check mb-2">
-                      <input class="form-check-input" type="radio" name="notifyDayType" id="day-daily" value="daily" onchange="toggleDaySelection()">
-                      <label class="form-check-label text-dark fw-medium" for="day-daily">แจ้งเตือนทุกวัน (จันทร์ - อาทิตย์)</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="notifyDayType" id="day-specific" value="specific" onchange="toggleDaySelection()">
-                      <label class="form-check-label text-dark fw-medium" for="day-specific">เลือกเฉพาะบางวัน (เช่น จันทร์-ศุกร์)</label>
-                    </div>
-                    
-                    <div id="specific-days-container" class="mt-3 pt-3 border-top" style="display: none;">
-                      <div class="d-flex flex-wrap gap-3">
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="MONDAY" id="day-mon"><label class="form-check-label" for="day-mon">จันทร์</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="TUESDAY" id="day-tue"><label class="form-check-label" for="day-tue">อังคาร</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="WEDNESDAY" id="day-wed"><label class="form-check-label" for="day-wed">พุธ</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="THURSDAY" id="day-thu"><label class="form-check-label" for="day-thu">พฤหัส</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="FRIDAY" id="day-fri"><label class="form-check-label" for="day-fri">ศุกร์</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="SATURDAY" id="day-sat"><label class="form-check-label" for="day-sat">เสาร์</label></div>
-                        <div class="form-check"><input class="form-check-input day-checkbox" type="checkbox" value="SUNDAY" id="day-sun"><label class="form-check-label" for="day-sun">อาทิตย์</label></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mb-4">
-                  <label class="form-label fw-bold text-dark">🕒 ช่วงเวลาที่แจ้งเตือน</label>
-                  <select class="form-select form-select-lg bg-light shadow-sm border fw-medium" id="set-notify-hour">
-                    <option value="6">เช้าตรู่ : 06:00 - 07:00 น.</option>
-                    <option value="7">ก่อนเข้างาน : 07:00 - 08:00 น.</option>
-                    <option value="8">เริ่มงาน : 08:00 - 09:00 น.</option>
-                    <option value="9">สายๆ : 09:00 - 10:00 น.</option>
-                    <option value="12">พักเที่ยง : 12:00 - 13:00 น.</option>
-                    <option value="16">ก่อนเลิกงาน : 16:00 - 17:00 น.</option>
-                    <option value="20">ช่วงค่ำ : 20:00 - 21:00 น.</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="text-end mt-4">
-                <button type="submit" class="btn btn-dark rounded-pill px-5 shadow fs-5 fw-bold" id="btn-save-settings">💾 บันทึกการตั้งค่า</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div> <!-- End Container -->
+  </footer>
 
   <!-- Modals -->
   <div class="modal fade" id="viewModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-        <div class="modal-header bg-light border-0 py-3">
-          <h5 class="modal-title fw-bold text-brand" id="view-title">รายละเอียดวารสาร</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="view-title">รายละเอียดวารสาร</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
         </div>
-        <div class="modal-body p-4" id="view-body"></div>
-        <div class="modal-footer border-0 bg-light">
-          <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+        <div class="modal-body" id="view-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ปิด</button>
         </div>
       </div>
     </div>
   </div>
 
   <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-        <div class="modal-header bg-dark text-white border-0 py-3">
-          <h5 class="modal-title fw-bold">✏️ แก้ไขข้อมูล (Admin)</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-pencil-square me-2 text-brand"></i>แก้ไขข้อมูลวารสาร</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="ปิด"></button>
         </div>
-        <div class="modal-body p-4 bg-light">
+        <div class="modal-body">
           <form id="edit-form" onsubmit="handleEditSubmit(event)">
             <input type="hidden" id="e-id">
-            
-            <div class="row g-3">
-              <div class="col-md-6 mb-2">
-                <label class="form-label fw-bold">เลขทะเบียน</label>
-                <input type="text" class="form-control shadow-sm" id="e-regNo" required>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="e-regNo">เลขทะเบียน</label>
+                <input type="text" class="form-control" id="e-regNo" required>
               </div>
-              <div class="col-md-6 mb-2">
-                <label class="form-label fw-bold text-dark">สถานะการดำเนินงาน</label>
-                <select class="form-select border-warning shadow-sm fw-medium" id="e-status" required>
+              <div class="col-md-6">
+                <label class="form-label" for="e-status">สถานะการดำเนินงาน</label>
+                <select class="form-select" id="e-status" required>
                   <option value="รอดำเนินการ">รอดำเนินการ</option>
                   <option value="ดำเนินการเรียบร้อย">ดำเนินการเรียบร้อย</option>
                   <option value="ไม่สามารถดำเนินการได้">ไม่สามารถดำเนินการได้</option>
@@ -394,24 +408,24 @@
               </div>
             </div>
 
-            <div class="mb-3 mt-3">
-              <label class="form-label fw-bold">หัวข้อ</label>
-              <input type="text" class="form-control shadow-sm" id="e-topic" required>
+            <div class="mb-3">
+              <label class="form-label" for="e-topic">หัวข้อ</label>
+              <input type="text" class="form-control" id="e-topic" required>
             </div>
 
             <div class="mb-3">
-              <label class="form-label fw-bold">เนื้อหา</label>
-              <textarea class="form-control shadow-sm" id="e-content" rows="4" required></textarea>
+              <label class="form-label" for="e-content">เนื้อหา</label>
+              <textarea class="form-control" id="e-content" rows="4" required></textarea>
             </div>
 
-            <div class="row g-3">
-              <div class="col-md-4 mb-2">
-                <label class="form-label fw-bold">ผู้กรอก</label>
-                <input type="text" class="form-control shadow-sm" id="e-author" required>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label" for="e-author">ผู้กรอก</label>
+                <input type="text" class="form-control" id="e-author" required>
               </div>
-              <div class="col-md-4 mb-2">
-                <label class="form-label fw-bold">หมวดหมู่</label>
-                <select class="form-select shadow-sm" id="e-category" required onchange="toggleOtherCategory('e-category', 'e-category-other-div')">
+              <div class="col-md-4">
+                <label class="form-label" for="e-category">กลุ่มงาน</label>
+                <select class="form-select" id="e-category" required onchange="toggleOtherCategory('e-category', 'e-category-other-div')">
                   <option value="กลุ่มบริหารงานวิชาการ">กลุ่มบริหารงานวิชาการ</option>
                   <option value="กลุ่มบริหารงานงบประมาณ">กลุ่มบริหารงานงบประมาณ</option>
                   <option value="กลุ่มบริหารงานทั่วไป">กลุ่มบริหารงานทั่วไป</option>
@@ -419,20 +433,20 @@
                   <option value="อื่นๆ">อื่นๆ</option>
                 </select>
               </div>
-              <div class="col-md-4 mb-2" id="e-category-other-div" style="display: none;">
-                <label class="form-label fw-bold text-brand">หมวดหมู่เพิ่มเติม</label>
-                <input type="text" class="form-control shadow-sm" id="e-category-other">
+              <div class="col-md-4" id="e-category-other-div" style="display: none;">
+                <label class="form-label" for="e-category-other">ระบุกลุ่มงาน</label>
+                <input type="text" class="form-control" id="e-category-other">
               </div>
             </div>
 
-            <div class="mb-4 mt-4 p-3 bg-white border rounded-3 border-danger shadow-sm">
-              <label class="form-label fw-bold text-danger">หมายเหตุ (เฉพาะ Admin)</label>
-              <input type="text" class="form-control bg-light" id="e-note" placeholder="ระบุสาเหตุหากไม่สามารถดำเนินการได้...">
+            <div class="mb-2">
+              <label class="form-label" for="e-note">หมายเหตุ <span class="text-muted fw-normal">(แสดงในรายละเอียด)</span></label>
+              <input type="text" class="form-control" id="e-note" placeholder="เช่น สาเหตุที่ไม่สามารถดำเนินการได้">
             </div>
 
-            <div class="text-end mt-4">
-              <button type="button" class="btn btn-light border px-4 rounded-pill me-2 shadow-sm fw-bold" data-bs-dismiss="modal">ยกเลิก</button>
-              <button type="submit" class="btn btn-dark px-4 rounded-pill shadow fw-bold" id="btn-save-edit">บันทึกการแก้ไข</button>
+            <div class="form-actions mt-4">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+              <button type="submit" class="btn btn-brand" id="btn-save-edit">บันทึกการแก้ไข</button>
             </div>
           </form>
         </div>
@@ -441,7 +455,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
+
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
